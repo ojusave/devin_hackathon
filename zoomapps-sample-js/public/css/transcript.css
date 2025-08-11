@@ -1,0 +1,348 @@
+/* Task Suggestion Styles */
+.task-suggestion {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.task-suggestion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.task-icon {
+    font-size: 1.5em;
+    margin-right: 8px;
+}
+
+.task-title {
+    font-weight: 600;
+    font-size: 1.1em;
+    flex-grow: 1;
+}
+
+.close-suggestion {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-suggestion:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.task-suggestion-content {
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.task-type {
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.task-description {
+    font-size: 1em;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.task-action {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.task-confidence {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.backend-indicator {
+    font-size: 0.85em;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+.backend-indicator.backend-yes {
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid rgba(76, 175, 80, 0.4);
+    color: #c8e6c9;
+}
+
+.backend-indicator.backend-no {
+    background: rgba(255, 193, 7, 0.2);
+    border: 1px solid rgba(255, 193, 7, 0.4);
+    color: #fff3c4;
+}
+
+.task-suggestion-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-create-task {
+    background: rgba(255, 255, 255, 0.9);
+    color: #667eea;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+    transition: all 0.2s ease;
+}
+
+.btn-create-task:hover {
+    background: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-dismiss {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-dismiss:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Transcript Container Styles */
+#transcript-container {
+    margin-top: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #f9f9f9;
+    padding: 16px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+#transcript-container h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #333;
+    font-size: 1.2em;
+    border-bottom: 2px solid #007acc;
+    padding-bottom: 8px;
+}
+
+/* Status Indicator */
+#transcript-status {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.status-connected {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-disconnected {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Transcript List */
+.transcript-list {
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+}
+
+.no-transcripts {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+    margin: 0;
+}
+
+/* Individual Transcript Items */
+.transcript-item {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+.transcript-item.system-message {
+    background: #f0f8ff;
+    border-color: #007acc;
+    font-style: italic;
+}
+
+.transcript-item.system-message .speaker {
+    color: #007acc;
+    font-weight: bold;
+}
+
+.transcript-item:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.transcript-item:first-child {
+    border-left: 4px solid #007acc;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Transcript Header */
+.transcript-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.transcript-header .speaker {
+    font-weight: bold;
+    color: #333;
+}
+
+.transcript-header .meeting-uuid {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.75em;
+    font-family: monospace;
+    margin: 0 8px;
+}
+
+.transcript-header .timestamp {
+    color: #666;
+    font-size: 0.85em;
+}
+
+.transcript-speaker {
+    font-weight: 600;
+    color: #007acc;
+    font-size: 0.9em;
+}
+
+.transcript-time {
+    font-size: 0.8em;
+    color: #666;
+    font-family: monospace;
+}
+
+/* Transcript Text */
+.transcript-text {
+    color: #333;
+    line-height: 1.4;
+    font-size: 0.95em;
+    word-wrap: break-word;
+}
+
+/* Scrollbar Styling */
+.transcript-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.transcript-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.transcript-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.transcript-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    #transcript-container {
+        margin-top: 16px;
+        padding: 12px;
+        max-height: 400px;
+    }
+    
+    .transcript-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .transcript-speaker,
+    .transcript-time {
+        font-size: 0.85em;
+    }
+    
+    .transcript-text {
+        font-size: 0.9em;
+    }
+}
