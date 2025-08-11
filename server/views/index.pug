@@ -61,17 +61,53 @@ block content
         }
 
 append scripts
-    // Load native WebSocket transcript connection (following ActionExtractor pattern)
+    // Enhanced WebSocket transcript connection with analytics
     script.
-        console.log('🔧 Loading WebSocket transcript connection...');
+        console.log('🔧 Loading enhanced WebSocket transcript connection...');
+        
+        // Analytics tracking variables
+        let sessionStartTime = Date.now();
+        let totalTranscripts = 0;
+        let uniqueSpeakers = new Set();
+        let totalWords = 0;
+        let recentTranscripts = [];
         
         // Get meeting UUID from URL or use default for testing
         const urlParams = new URLSearchParams(window.location.search);
         const meetingUuid = urlParams.get('meetingUuid') || 'S/N3ZB7NQj+1oNKkv+t5zA==';
         
-        // WebSocket connection (following ActionExtractor pattern)
+        // DOM elements
         const transcriptDisplay = document.getElementById('transcript-list');
         const statusDisplay = document.getElementById('transcript-status');
+        const totalTranscriptsEl = document.getElementById('total-transcripts');
+        const activeSpeakersEl = document.getElementById('active-speakers');
+        const sessionDurationEl = document.getElementById('session-duration');
+        const wordsPerMinuteEl = document.getElementById('words-per-minute');
+        
+        // Analytics update function
+        function updateAnalytics() {
+            const currentTime = Date.now();
+            const sessionDuration = Math.floor((currentTime - sessionStartTime) / 1000);
+            const minutes = Math.floor(sessionDuration / 60);
+            const seconds = sessionDuration % 60;
+            
+            // Update UI
+            totalTranscriptsEl.textContent = totalTranscripts;
+            activeSpeakersEl.textContent = uniqueSpeakers.size;
+            sessionDurationEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Calculate words per minute (based on recent 5-minute window)
+            const fiveMinutesAgo = currentTime - (5 * 60 * 1000);
+            const recentWords = recentTranscripts
+                .filter(t => t.timestamp > fiveMinutesAgo)
+                .reduce((sum, t) => sum + t.wordCount, 0);
+            const minutesElapsed = Math.min(5, sessionDuration / 60);
+            const wpm = minutesElapsed > 0 ? Math.round(recentWords / minutesElapsed) : 0;
+            wordsPerMinuteEl.textContent = wpm;
+        }
+        
+        // Update analytics every second
+        setInterval(updateAnalytics, 1000);
         
         if (transcriptDisplay && statusDisplay) {
             const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -82,7 +118,7 @@ append scripts
             
             ws.onopen = () => {
                 console.log('✅ Transcript WebSocket connected');
-                statusDisplay.textContent = 'Connected. Waiting for transcripts...';
+                statusDisplay.textContent = '🟢 Connected. Waiting for transcripts...';
                 statusDisplay.className = 'status-connected';
                 
                 // Join the meeting room
@@ -101,7 +137,7 @@ append scripts
                     
                     if (message.type === 'joined') {
                         console.log('✅ Successfully joined meeting:', message.meetingUuid);
-                        statusDisplay.textContent = `Connected to meeting: ${message.meetingUuid}`;
+                        statusDisplay.textContent = `🟢 Connected to meeting: ${message.meetingUuid}`;
                     } else if (message.type === 'transcript' && message.data) {
                         console.log('🎯 RECEIVED TRANSCRIPT:', message.data);
                         
@@ -111,20 +147,51 @@ append scripts
                             noTranscriptsMsg.remove();
                         }
                         
-                        // Create transcript element
+                        const transcriptText = message.data.transcript || message.data.text || 'No text';
+                        const speaker = message.data.speaker || 'Unknown Speaker';
+                        const timestamp = new Date(message.data.timestamp || Date.now());
+                        
+                        // Update analytics
+                        totalTranscripts++;
+                        uniqueSpeakers.add(speaker);
+                        const wordCount = transcriptText.split(/\s+/).filter(word => word.length > 0).length;
+                        totalWords += wordCount;
+                        
+                        // Track recent transcripts for WPM calculation
+                        recentTranscripts.push({
+                            timestamp: Date.now(),
+                            wordCount: wordCount
+                        });
+                        
+                        // Clean old transcripts (keep only last hour)
+                        const oneHourAgo = Date.now() - (60 * 60 * 1000);
+                        recentTranscripts = recentTranscripts.filter(t => t.timestamp > oneHourAgo);
+                        
+                        // Determine speaker color/ID for styling
+                        const speakerArray = Array.from(uniqueSpeakers);
+                        const speakerIndex = speakerArray.indexOf(speaker);
+                        const speakerId = `speaker-${(speakerIndex % 5) + 1}`;
+                        
+                        // Create enhanced transcript element
                         const transcriptDiv = document.createElement('div');
                         transcriptDiv.className = 'transcript-item';
+                        transcriptDiv.setAttribute('data-speaker', speakerId);
                         transcriptDiv.innerHTML = `
-                            <div class="transcript-speaker">${message.data.speaker || 'Unknown Speaker'}</div>
-                            <div class="transcript-text">${message.data.transcript || message.data.text || 'No text'}</div>
-                            <div class="transcript-time">${new Date(message.data.timestamp).toLocaleTimeString()}</div>
+                            <div class="transcript-header">
+                                <div class="transcript-speaker">${speaker}</div>
+                                <div class="transcript-time">${timestamp.toLocaleTimeString()}</div>
+                            </div>
+                            <div class="transcript-text">${transcriptText}</div>
                         `;
                         
                         // Add to transcript list (newest at top)
                         transcriptDisplay.insertBefore(transcriptDiv, transcriptDisplay.firstChild);
                         
                         // Update status
-                        statusDisplay.textContent = `Last transcript: ${new Date().toLocaleTimeString()}`;
+                        statusDisplay.textContent = `🟢 Last transcript: ${timestamp.toLocaleTimeString()}`;
+                        
+                        // Update analytics immediately
+                        updateAnalytics();
                     }
                 } catch (e) {
                     console.error('❌ Error parsing WebSocket message:', e);
@@ -133,62 +200,21 @@ append scripts
             
             ws.onerror = (error) => {
                 console.error('❌ Transcript WebSocket error:', error);
-                statusDisplay.textContent = 'Error connecting to transcript service';
+                statusDisplay.textContent = '🔴 Error connecting to transcript service';
                 statusDisplay.className = 'status-error';
             };
             
             ws.onclose = () => {
                 console.log('🔌 Transcript WebSocket closed');
-                statusDisplay.textContent = 'Disconnected from transcript service';
+                statusDisplay.textContent = '🟠 Disconnected from transcript service';
                 statusDisplay.className = 'status-disconnected';
             };
         } else {
             console.error('❌ Transcript display elements not found!');
         }
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔧 DOM loaded, initializing Socket.IO...');
-            if (typeof io !== 'undefined') {
-                console.log('✅ Socket.IO library loaded');
-                const socket = io();
-                
-                socket.on('connect', () => {
-                    console.log('🔗 Socket.IO connected:', socket.id);
-                    // Join the meeting room with the meeting UUID from server logs
-                    const meetingUuid = 'S/N3ZB7NQj+1oNKkv+t5zA==';
-                    socket.emit('join-meeting', meetingUuid);
-                    console.log('🏠 Joined meeting room:', meetingUuid);
-                });
-                
-                socket.on('transcript', (data) => {
-                    console.log('🎯 RECEIVED TRANSCRIPT:', data);
-                    // Add transcript to UI
-                    const transcriptList = document.getElementById('transcript-list');
-                    const noTranscripts = transcriptList.querySelector('.no-transcripts');
-                    if (noTranscripts) noTranscripts.remove();
-                    
-                    const transcriptDiv = document.createElement('div');
-                    transcriptDiv.className = 'transcript-item';
-                    transcriptDiv.innerHTML = `
-                        <div class="transcript-header">
-                            <span class="transcript-speaker">${data.speaker || 'Unknown'}</span>
-                            <span class="transcript-time">${new Date().toLocaleTimeString()}</span>
-                        </div>
-                        <div class="transcript-text">${data.transcript || data.text || 'No text'}</div>
-                    `;
-                    transcriptList.insertBefore(transcriptDiv, transcriptList.firstChild);
-                });
-                
-                socket.on('disconnect', () => {
-                    console.log('🔌 Socket.IO disconnected');
-                });
-                
-                socket.on('connect_error', (error) => {
-                    console.error('❌ Socket.IO connection error:', error);
-                });
-            } else {
-                console.error('❌ Socket.IO library not loaded');
-            }
-        });
+        
+        // Initialize analytics display
+        updateAnalytics();
     if isZoom
         script(type="module" src='/js/bundle.mjs')
         script(nomodule src='/js/bundle.js')
