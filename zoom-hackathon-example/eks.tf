@@ -21,7 +21,7 @@ resource "aws_eks_node_group" "main" {
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = aws_subnet.private.*.id
 
-  instance_types = [var.ec2_instance_type]
+  instance_types = [var.eks_instance_type]
   
   scaling_config {
     desired_size = 2
@@ -50,14 +50,14 @@ resource "aws_eks_node_group" "main" {
 
   // Example of how you might think about CPU/Memory at this level.
   // The actual enforcement is at the k8s level.
-  // For t3.medium, we have 2 vCPUs and 4 GiB memory.
+  // For t3.xlarge, we have 4 vCPUs and 16 GiB memory.
   // We can tag the node group to indicate its intended resource profile.
   tags = {
     Name = "main-node-group"
     "k8s.io/cluster-autoscaler/enabled" = "true"
     "k8s.io/cluster-autoscaler/${var.eks_cluster_name}" = "owned"
-    "resource.cpu" = "2"
-    "resource.memory_gb" = "4"
+    "resource.cpu" = "4"
+    "resource.memory_gb" = "16"
   }
 
   depends_on = [

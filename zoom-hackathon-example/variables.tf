@@ -37,7 +37,13 @@ variable "eks_node_group_name" {
 variable "ec2_instance_type" {
   description = "The instance type for the EC2 instances."
   type        = string
-  default     = "t3.medium"
+  default     = "t3.large"
+}
+
+variable "eks_instance_type" {
+  description = "The instance type for the EKS node group instances."
+  type        = string
+  default     = "t3.xlarge"
 }
 
 variable "ec2_ami_id" {
