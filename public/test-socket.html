@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket.IO Test</title>
+</head>
+<body>
+    <h1>Socket.IO Connection Test</h1>
+    <div id="status">Connecting...</div>
+    <div id="transcripts"></div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        console.log('🔧 Loading Socket.IO test...');
+        
+        const socket = io();
+        const statusDiv = document.getElementById('status');
+        const transcriptsDiv = document.getElementById('transcripts');
+        
+        socket.on('connect', () => {
+            console.log('✅ Socket.IO connected:', socket.id);
+            statusDiv.innerHTML = `✅ Connected: ${socket.id}`;
+            
+            // Join the meeting room with the meeting UUID from server logs
+            const meetingUuid = 'S/N3ZB7NQj+1oNKkv+t5zA==';
+            socket.emit('join-meeting', meetingUuid);
+            console.log('🏠 Joined meeting room:', meetingUuid);
+        });
+        
+        socket.on('transcript', (data) => {
+            console.log('🎯 RECEIVED TRANSCRIPT:', data);
+            const transcriptDiv = document.createElement('div');
+            transcriptDiv.style.border = '1px solid #ccc';
+            transcriptDiv.style.margin = '5px';
+            transcriptDiv.style.padding = '10px';
+            transcriptDiv.innerHTML = `
+                <strong>${data.speaker || 'Unknown'}</strong> 
+                (${new Date().toLocaleTimeString()}): 
+                ${data.transcript || data.text || 'No text'}
+            `;
+            transcriptsDiv.insertBefore(transcriptDiv, transcriptsDiv.firstChild);
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('🔌 Socket.IO disconnected');
+            statusDiv.innerHTML = '❌ Disconnected';
+        });
+        
+        socket.on('connect_error', (error) => {
+            console.error('❌ Socket.IO connection error:', error);
+            statusDiv.innerHTML = `❌ Connection Error: ${error.message}`;
+        });
+    </script>
+</body>
+</html>
